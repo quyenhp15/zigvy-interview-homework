@@ -20,7 +20,7 @@ export const TaskBoard = ({ tasks }: TaskBoardProps) => {
           <ColumnTitle>{status}</ColumnTitle>
           <TaskList>
             {tasks
-              .filter((task) => task.status === status)
+              ?.filter((task) => task.status === status)
               .map((task) => (
                 <TaskCard
                   key={task.id}

@@ -1,75 +1,80 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { TaskBoard } from "./task-board";
-import { Button, Input, Space } from "antd";
+import { Button, Input, Result, Space, Spin } from "antd";
 import styled from "styled-components";
-import { Task, TaskStatus } from "../../models";
+import { Task } from "../../models";
 import { PlusOutlined } from "@ant-design/icons";
 import { CreateTaskModal } from "./create-task-modal";
-
-const initialTasks: Task[] = [
-  {
-    id: "1",
-    title: "Set up project",
-    description: "Initialize repo and install dependencies",
-    status: TaskStatus.TODO,
-  },
-  {
-    id: "2",
-    title: "Build Sign In UI",
-    description: "Form, validation, connection to API",
-    status: TaskStatus.IN_PROGRESS,
-  },
-  {
-    id: "3",
-    title: "Deploy App",
-    description: "CI/CD to Vercel",
-    status: TaskStatus.DONE,
-  },
-];
+import { useGetTasks } from "../../hooks";
 
 export const DashBoard: React.FC = () => {
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [search, setSearch] = useState("");
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  const { data, isPending, isSuccess, isError } = useGetTasks();
+
+  useEffect(() => {
+    if (isSuccess) {
+      setTasks(data);
+    }
+  }, [isSuccess]);
+
   const filteredTasks = useMemo(() => {
-    return tasks.filter((task) => {
-      const matchesTitle = task.title
+    if (tasks?.length === 0) {
+      return undefined;
+    }
+
+    const filteredTasks = tasks?.filter((task) => {
+      const isMatchTitle = task.title
         .toLowerCase()
         .includes(search.toLowerCase());
 
-      return matchesTitle;
+      return isMatchTitle;
     });
+
+    if (filteredTasks?.length === 0) {
+      return undefined;
+    }
+    return filteredTasks;
   }, [search, tasks]);
+
+  if (isError) {
+    return <Result status="warning" title="There are some problems" />;
+  }
 
   return (
     <StyledDashBoardContainer direction="vertical" size={"large"}>
-      <StyledSpace align="baseline">
-        <Input
-          placeholder="Search by title"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ width: 240 }}
+      <Spin spinning={isPending}>
+        <StyledSpaceContainer direction="vertical">
+          <StyledSpace align="baseline">
+            <Input
+              placeholder="Search by title"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{ width: 240 }}
+            />
+            <div style={{ marginLeft: "auto" }}>
+              <Button
+                type="primary"
+                onClick={() => {
+                  setIsCreateModalOpen(true);
+                  console.log("click btn");
+                }}
+                icon={<PlusOutlined />}
+              >
+                Create Task
+              </Button>
+            </div>
+          </StyledSpace>
+          <TaskBoard tasks={filteredTasks || tasks} />
+        </StyledSpaceContainer>
+        <CreateTaskModal
+          isVisible={isCreateModalOpen}
+          onCancel={() => setIsCreateModalOpen(false)}
+          onSuccess={(task: Task) => setTasks([...tasks, task])}
         />
-        <div style={{ marginLeft: "auto" }}>
-          <Button
-            type="primary"
-            onClick={() => {
-              setIsCreateModalOpen(true);
-              console.log("click btn");
-            }}
-            icon={<PlusOutlined />}
-          >
-            Create Task
-          </Button>
-        </div>
-      </StyledSpace>
-      <TaskBoard tasks={filteredTasks || tasks} />
-      <CreateTaskModal
-        isVisible={isCreateModalOpen}
-        onCancel={() => setIsCreateModalOpen(false)}
-        onSuccess={(task: Task) => setTasks([...tasks, task])}
-      />
+      </Spin>
     </StyledDashBoardContainer>
   );
 };
@@ -84,4 +89,8 @@ const StyledDashBoardContainer = styled(Space)`
   justify-content: space-around;
 
   padding: 10px 10px;
+`;
+
+const StyledSpaceContainer = styled(Space)`
+  width: 100%;
 `;
