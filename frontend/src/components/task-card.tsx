@@ -1,73 +1,29 @@
-// src/components/TaskCard.tsx
 import React from "react";
 import styled from "styled-components";
-import { Card, Tag, Typography, Space, Button, Tooltip } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Card, Tag, Typography, Space } from "antd";
 import { Task } from "../models";
+import { getStatusColor } from "../utils";
 
-const { Paragraph, Text } = Typography;
+const { Paragraph } = Typography;
 
 interface TaskCardProps {
   task: Task;
-  onEdit?: (task: Task) => void;
-  onDelete?: (taskId: string) => void;
+  onClick?: () => void;
 }
 
-export const TaskCard: React.FC<TaskCardProps> = ({
-  task,
-  onEdit,
-  onDelete,
-}) => {
-  const getStatusColor = (status: Task["status"]) => {
-    switch (status) {
-      case "To Do":
-        return "default";
-      case "In Progress":
-        return "blue";
-      case "Done":
-        return "green";
-      default:
-        return "default";
-    }
-  };
-
+export const TaskCard: React.FC<TaskCardProps> = ({ task, onClick }) => {
   return (
-    <StyledCard
-      title={<CardTitle>{task.title}</CardTitle>}
-      extra={
-        <Space>
-          <Tooltip title="Edit">
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => onEdit?.(task)}
-              size="small"
-            />
-          </Tooltip>
-          <Tooltip title="Delete">
-            <Button
-              icon={<DeleteOutlined />}
-              onClick={() => onDelete?.(task.id)}
-              size="small"
-              danger
-            />
-          </Tooltip>
-        </Space>
-      }
-    >
+    <StyledCard title={<CardTitle>{task.title}</CardTitle>} onClick={onClick}>
       <Space direction="vertical" size="small">
         <Paragraph ellipsis={{ rows: 2 }}>{task.description}</Paragraph>
         <Space size="middle">
           <Tag color={getStatusColor(task.status)}>{task.status}</Tag>
         </Space>
-        {task?.dueDate && (
-          <Text type="secondary">Due: {task.dueDate.toLocaleDateString()}</Text>
-        )}
       </Space>
     </StyledCard>
   );
 };
 
-// Styled-components
 const StyledCard = styled(Card)`
   width: 300px;
   border-radius: 12px;

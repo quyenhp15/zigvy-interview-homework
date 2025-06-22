@@ -1,4 +1,4 @@
-import axios from "./axios-instance";
+import axiosInstance from "../axios-instance";
 
 export type SignUpInput = {
   email: string;
@@ -11,7 +11,7 @@ type SignUpOutput = {
 };
 
 export const signUp = async (data: SignUpInput): Promise<SignUpOutput> => {
-  const result = await axios.post("/auth/sign-up", data);
+  const result = await axiosInstance.post("/auth/sign-up", data);
   const output = result.data.data as SignUpOutput;
   return output;
 };

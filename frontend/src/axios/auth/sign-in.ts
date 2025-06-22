@@ -1,4 +1,4 @@
-import axios from "./axios-instance";
+import axiosInstance from "../axios-instance";
 
 type SignInInput = {
   email: string;
@@ -10,7 +10,7 @@ type SignInOutput = {
 };
 
 export const signIn = async (data: SignInInput) => {
-  const result = await axios.post("/auth/sign-in", data);
+  const result = await axiosInstance.post("/auth/sign-in", data);
   const output = result.data.data as SignInOutput;
   return output;
 };
